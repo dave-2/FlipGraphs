@@ -1,13 +1,19 @@
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.IOException;
 
 public class ForceGraph extends Graph {
    private Graph baseGraph;
 
-   public static ForceGraph fromFile(File file) throws FileNotFoundException, IOException {
+   public static ForceGraph fromFile(File file) throws IOException {
       ForceGraph g = new ForceGraph();
       g.baseGraph = Graph.fromFile(file);
+      return g;
+   }
+
+   public static ForceGraph fromStream(InputStream stream) throws IOException {
+      ForceGraph g = new ForceGraph();
+      g.baseGraph = Graph.fromStream(stream);
       return g;
    }
 

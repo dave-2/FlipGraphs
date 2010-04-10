@@ -1,9 +1,11 @@
 import processing.core.PApplet;
 
+import java.io.Reader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.util.Set;
@@ -15,15 +17,23 @@ import java.util.StringTokenizer;
 public class Graph {
    protected Set<Vertex> vertices = new HashSet<Vertex>();
 
-   public static Graph fromFile(File file) throws FileNotFoundException, IOException {
-      BufferedReader reader = new BufferedReader(new FileReader(file));
+   public static Graph fromFile(File file) throws IOException {
+      return fromReader(new FileReader(file));
+   }
+
+   public static Graph fromStream(InputStream stream) throws IOException {
+      return fromReader(new InputStreamReader(stream));
+   }
+
+   private static Graph fromReader(Reader reader) throws IOException {
+      BufferedReader bufReader = new BufferedReader(reader);
 
       // need an ordered list of new vertices
       List<Vertex> newVerts = new ArrayList<Vertex>();
 
       // parse file
       String line;
-      while ((line = reader.readLine()) != null) {
+      while ((line = bufReader.readLine()) != null) {
          // parse line
          StringTokenizer tokenizer = new StringTokenizer(line);
          if (!tokenizer.hasMoreTokens())

@@ -1,11 +1,11 @@
 import processing.core.*;
 
-import java.io.File;
-import javax.swing.JFileChooser;
+//import java.io.File;
+//import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 public class GraphDrawing extends PApplet {
-   private final JFileChooser chooser = new JFileChooser("graphs");
+   //private final JFileChooser chooser = new JFileChooser("graphs");
 
    private final float scale = 50;
    private final float camDist = 3 * scale;
@@ -13,39 +13,52 @@ public class GraphDrawing extends PApplet {
 
    private float camTheta = 0, camPhi = PI * 0.5f;
 
-   private File file = null;
+   private boolean setupGraph = false;
    private ForceGraph graph;
 
    private int prevMouseX, prevMouseY;
 
    private void loadGraph() {
-      SwingUtilities.invokeLater(new Runnable() {
-         public void run() {
-            switch (chooser.showOpenDialog(null)) {
-               case JFileChooser.APPROVE_OPTION:
-                  file = chooser.getSelectedFile();
-                  break;
-               case JFileChooser.CANCEL_OPTION:
-                  break;
-               default:
-                  System.exit(-1);
-                  break;
-            }
-         }
-      });
-   }
-
-   private void setupGraph() {
       try {
-         graph = ForceGraph.fromFile(file);
+         graph = ForceGraph.fromStream(getClass().getResourceAsStream("/graphs/stellated_dodecahedron.graph"));
+         setupGraph = true;
 
-         while (graph.canGrow())
-            graph.grow();
+         /*
+         SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+               switch (chooser.showOpenDialog(null)) {
+                  case JFileChooser.APPROVE_OPTION:
+                     try {
+                        File file = chooser.getSelectedFile();
+                        graph = ForceGraph.fromFile(file);
+                        setupGraph = true;
+                     }
+                     catch (Exception e) {
+                        e.printStackTrace();
+                        System.exit(-1);
+                     }
+                     break;
+                  case JFileChooser.CANCEL_OPTION:
+                     break;
+                  default:
+                     System.exit(-1);
+                     break;
+               }
+            }
+         });
+         */
       }
       catch (Exception e) {
          e.printStackTrace();
          System.exit(-1);
       }
+   }
+
+   private void setupGraph() {
+      while (graph.canGrow())
+         graph.grow();
+
+      setupGraph = false;
    }
 
    public void setup() {
@@ -60,10 +73,8 @@ public class GraphDrawing extends PApplet {
    }
 
    public void draw() {
-      if (file != null) {
+      if (setupGraph)
          setupGraph();
-         file = null;
-      }
 
       Vector cam = Vector.sphereToRect(camDist, camTheta, camPhi);
       camera(cam.x, cam.y, cam.z, 0, 0, 0, camUp.x, camUp.y, camUp.z);

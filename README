@@ -1,0 +1,35 @@
+Graph Drawing
+By: Dave Tu
+
+SUMMARY
+
+GraphDrawing draws pretty graphs in 3D. It currently uses a force-directed
+algorithm that attempts to separate vertices by a unit length. Each vertex
+feels a force proportional to its distance from nearby vertices (adjusted by a
+unit distance). Simple numerical integration is used to reach a stable
+configuration because it will be a local minimum in kinetic energy. In
+addition, there is a position multiplying factor that causes the vertices to
+tend away from each other, causing the graphs to become as evenly spaced out as
+possible.
+
+In the future, other algorithms will be used and added.
+
+RUNNING
+
+The program is a Java/Processing applet. Open index.html to see it in action.
+Run it from the command line using "java GraphDrawing". The processing/ folder
+contains the Processing library needed to run it.
+
+Rotate the graph by dragging the mouse.
+
+COMPILING
+
+Type "javac GraphDrawing.java" from the command line.
+
+NOTES
+
+The applet takes adjacently lists as input. The graphs/ folder has examples of
+graphs represented in this format. Note that there are lines in
+GraphDrawing.java that can be uncommented to enable an Open File Dialog when
+run locally. They are removed because of the restriction that unsigned applets
+cannot access the filesystem.

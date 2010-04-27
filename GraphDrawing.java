@@ -1,29 +1,30 @@
 import processing.core.*;
 
-//import java.io.File;
-//import javax.swing.JFileChooser;
+import java.io.File;
+import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 public class GraphDrawing extends PApplet {
-   //private final JFileChooser chooser = new JFileChooser("graphs");
+   private final JFileChooser chooser = new JFileChooser("graphs");
+
+   private final float threshold = 5;
+   private final float force = 100;
+   private final float damping = 15;
 
    private final float scale = 50;
-   private final float camDist = 3 * scale;
+   private final float camDist = 2 * scale;
    private final Vector camUp = new Vector(0, 0, 1);
 
    private float camTheta = 0, camPhi = PI * 0.5f;
 
-   private boolean setupGraph = false;
    private ForceGraph graph;
 
    private int prevMouseX, prevMouseY;
 
    private void loadGraph() {
       try {
-         graph = ForceGraph.fromStream(getClass().getResourceAsStream("/graphs/stellated_dodecahedron.graph"));
-         setupGraph = true;
+         //graph = ForceGraph.fromStream(getClass().getResourceAsStream("/graphs/stellated_dodecahedron.graph"));
 
-         /*
          SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                switch (chooser.showOpenDialog(null)) {
@@ -31,7 +32,6 @@ public class GraphDrawing extends PApplet {
                      try {
                         File file = chooser.getSelectedFile();
                         graph = ForceGraph.fromFile(file);
-                        setupGraph = true;
                      }
                      catch (Exception e) {
                         e.printStackTrace();
@@ -46,7 +46,6 @@ public class GraphDrawing extends PApplet {
                }
             }
          });
-         */
       }
       catch (Exception e) {
          e.printStackTrace();
@@ -54,16 +53,9 @@ public class GraphDrawing extends PApplet {
       }
    }
 
-   private void setupGraph() {
-      while (graph.canGrow())
-         graph.grow();
-
-      setupGraph = false;
-   }
-
    public void setup() {
       size(600, 600, P3D);
-      frameRate(60);
+      frameRate(30);
 
       fill(0, 64, 128);
 
@@ -73,16 +65,19 @@ public class GraphDrawing extends PApplet {
    }
 
    public void draw() {
-      if (setupGraph)
-         setupGraph();
-
       Vector cam = Vector.sphereToRect(camDist, camTheta, camPhi);
       camera(cam.x, cam.y, cam.z, 0, 0, 0, camUp.x, camUp.y, camUp.z);
 
       background(255);
 
       if (graph != null) {
-         graph.move();
+         if (graph.canGrow())
+            if (graph.getMaxForce() < threshold)
+               graph.grow();
+
+         for (int i = 0; i < 5; ++i)
+            graph.move(1/frameRate, force, damping);
+
          graph.draw(this, scale);
       }
    }

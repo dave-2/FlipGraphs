@@ -17,41 +17,125 @@ public class ForceGraph extends Graph {
       return g;
    }
 
+   public float getMaxForce() {
+      float force = 0;
+      for (Vertex v : vertices)
+         force = Math.max(force, v.acc.mag());
+
+      return force;
+   }
+
    public boolean canGrow() {
       return baseGraph.vertices.size() > 0;
    }
 
    public void grow() {
-      for (Vertex v : baseGraph.vertices) {
-         baseGraph.remove(v);
-         vertices.add(v);
+      if (vertices.size() == 0) {
+         Vertex maxVertex = null;
+         int maxDegree = 0;
+         for (Vertex v : baseGraph.vertices) {
+            maxVertex = v;
+            maxDegree = v.edges.size();
+            break;
+         }
 
-         v.pos.x = (float)Math.random() - 0.5f;
-         v.pos.y = (float)Math.random() - 0.5f;
-         v.pos.z = (float)Math.random() - 0.5f;
+         for (Vertex v : baseGraph.vertices) {
+            if (v.edges.size() > maxDegree) {
+               maxVertex = v;
+               maxDegree = v.edges.size();
+            }
+         }
+
+         baseGraph.remove(maxVertex);
+         vertices.add(maxVertex);
+         return;
+      }
+
+      Vertex maxVertex = null;
+      int maxDegree = 0;
+      for (Vertex v : baseGraph.vertices) {
+         maxVertex = v;
+         for (Vertex n : v.edges)
+            if (vertices.contains(n))
+               ++maxDegree;
          break;
       }
+
+      for (Vertex v : baseGraph.vertices) {
+         int degree = 0;
+         for (Vertex n : v.edges)
+            if (vertices.contains(n))
+               ++degree;
+
+         if (degree > maxDegree) {
+            maxVertex = v;
+            maxDegree = degree;
+         }
+      }
+
+      baseGraph.remove(maxVertex);
+      vertices.add(maxVertex);
+
+      if (maxDegree == 1) {
+         for (Vertex n : maxVertex.edges) {
+            if (vertices.contains(n)) {
+               if (n.pos.mag() == 0)
+                  maxVertex.pos = new Vector(0, 0, 1);
+               else
+                  maxVertex.pos = n.pos.add(n.pos.normalize());
+            }
+         }
+      }
+      else if (maxDegree > 1) {
+         for (Vertex n : maxVertex.edges)
+            if (vertices.contains(n))
+               maxVertex.pos = maxVertex.pos.add(n.pos);
+         maxVertex.pos = maxVertex.pos.div(maxDegree);
+      }
+
+      Vector random = new Vector();
+      random.x = (float)Math.random() - 0.5f;
+      random.y = (float)Math.random() - 0.5f;
+      random.z = (float)Math.random() - 0.5f;
+
+      maxVertex.pos = maxVertex.pos.add(random);
    }
 
-   public void move() {
+   public void move(float timestep, float force, float damping) {
+      // velocity verlet integration, part 1
+      for (Vertex v : vertices) {
+         v.pos = v.pos.add(v.vel.mult(timestep)).add(v.acc.mult(timestep*timestep/2));
+         v.vel = v.vel.add(v.acc.mult(timestep/2));
+      }
+
       // calculate forces
       for (Vertex v : vertices) {
-         for (Vertex n : v.edges) {
-            if (!vertices.contains(n))
+         v.acc = new Vector();
+
+         for (Vertex n : vertices) {
+            if (v == n)
                continue;
 
             Vector diff = n.pos.sub(v.pos);
-            Vector dist = diff.sub(diff.normalize());
-            v.vel = v.vel.add(dist.mult(0.1f));
+            if (v.edges.contains(n)) {
+               // adjacent vertices are attached with a spring of length 1
+               Vector magicDiff = diff.sub(diff.normalize());
+               v.acc = v.acc.add(magicDiff.mult(force));
+            }
+            else {
+               // repel nonadjacent vertices
+               Vector magicDiff = diff.normalize().div(diff.mag());
+               v.acc = v.acc.sub(magicDiff.mult(force));
+            }
          }
 
          // damping
-         v.vel = v.vel.mult(0.75f);
+         v.acc = v.acc.sub(v.vel.mult(damping));
       }
 
-      // numerical integration
+      // velocity verlet integration, part 2
       for (Vertex v : vertices)
-         v.pos = v.pos.add(v.vel);
+         v.vel = v.vel.add(v.acc.mult(timestep/2));
 
       // calculate center of bounding box
       Vector min = null;
@@ -72,10 +156,5 @@ public class ForceGraph extends Graph {
          for (Vertex v : vertices)
             v.pos = v.pos.sub(center);
       }
-
-      // fudge factor
-      for (Vertex v : vertices)
-         if (v.pos.mag() > 0)
-            v.pos = v.pos.add(v.pos.normalize().mult(0.1f));
    }
 }

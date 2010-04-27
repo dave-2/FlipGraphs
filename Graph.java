@@ -75,11 +75,20 @@ public class Graph {
       return vertices.size();
    }
 
-   public void draw(PApplet g, float scale) {
+   public void draw(PApplet g, float bound) {
+      float scale = 1;
+      for (Vertex v : vertices)
+         scale = Math.max(scale, v.pos.mag());
+      scale = bound / scale;
+
       g.noSmooth();
       g.noStroke();
       for (Vertex v : vertices) {
          g.translate(v.pos.x * scale, v.pos.y * scale, v.pos.z * scale);
+if (v.acc.mag() > 100 || v.vel.mag() > 100)
+   g.fill(255, 0, 0);
+else
+   g.fill(0, 64, 128);
          g.sphere(1);
          g.translate(-v.pos.x * scale, -v.pos.y * scale, -v.pos.z * scale);
       }

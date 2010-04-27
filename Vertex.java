@@ -2,8 +2,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class Vertex {
-   public Vector pos;
-   public Vector vel;
+   public Vector pos, vel, acc;
    public Set<Vertex> edges;
 
    public Vertex() {
@@ -19,8 +18,13 @@ public class Vertex {
    }
 
    public Vertex(Vector pos, Vector vel, Set<Vertex> edges) {
+      this(pos, vel, new Vector(), edges);
+   }
+
+   public Vertex(Vector pos, Vector vel, Vector acc, Set<Vertex> edges) {
       this.pos = pos;
       this.vel = vel;
+      this.acc = acc;
       this.edges = edges;
    }
 

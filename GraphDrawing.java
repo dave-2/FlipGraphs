@@ -7,9 +7,10 @@ import javax.swing.SwingUtilities;
 public class GraphDrawing extends PApplet {
    private final JFileChooser chooser = new JFileChooser("graphs");
 
-   private final float threshold = 5;
-   private final float force = 100;
-   private final float damping = 15;
+   private final float threshold = 1;
+   private final float force = 1;
+   private final float damping = 1;
+   private final float iterations = 10;
 
    private final float scale = 50;
    private final float camDist = 2 * scale;
@@ -55,7 +56,7 @@ public class GraphDrawing extends PApplet {
 
    public void setup() {
       size(600, 600, P3D);
-      frameRate(30);
+      frameRate(20);
 
       fill(0, 64, 128);
 
@@ -75,7 +76,7 @@ public class GraphDrawing extends PApplet {
             if (graph.getMaxForce() < threshold)
                graph.grow();
 
-         for (int i = 0; i < 5; ++i)
+         for (int i = 0; i < iterations; ++i)
             graph.move(1/frameRate, force, damping);
 
          graph.draw(this, scale);

@@ -5,8 +5,8 @@
       <title>Graph Drawing</title>
       <link rel="stylesheet" href="style.css" type="text/css">
       <!--[if IE]>
-         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-      <![endif]-->
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
    </head>
    <body>
       <header>
@@ -15,16 +15,20 @@
 
       <article>
          <div>
-            <object type="application/x-java-applet" width="600" height="600">
-               <param name="code" value="GraphDrawing.class">
-               <param name="archive" value="GraphDrawing.jar">
+            <object type="application/x-java-applet" width="800" height="600">
+               <param name="code" value="org.jdesktop.applet.util.JNLPAppletLauncher">
+               <param name="archive" value="GraphDrawing.jar,opengl.jar,controlP5.jar,core.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar">
+               <param name="jnlpNumExtensions" value="1">
+               <param name="jnlpExtension1" value="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp">
+               <param name="subapplet.classname" value="GraphDrawing">
+<param name="subapplet.displayname" value="GraphDrawing">
                <param name="boxbgcolor" value="#ffffff">
             </object>
          </div>
       </article>
 
       <footer>
-         <p><time datetime="2010-04-10" pubdate>April 10, 2010</time></p>
+         <p><time datetime="2010-04-30" pubdate>April 30, 2010</time></p>
       </footer>
 
    </body>

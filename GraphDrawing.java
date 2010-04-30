@@ -13,24 +13,26 @@ public class GraphDrawing extends PApplet {
    private final String graphDir = "graphs/";
    private final String extension = ".graph";
 
-   private final float growThreshold = 5;
-   private final float force = 1;
-   private final float damping = 1;
-   private final float iterations = 10;
-
-   private final float scale = 100;
-   private final float camDist = 2 * scale;
+   public int zoom = 100;
+   private final float camDist = 200;
    private final Vector camUp = new Vector(0, 0, 1);
    private float camTheta = 0, camPhi = (float)Math.PI / 2;
 
+   public float force = 1;
+   public float damping = 1;
+   public float growthRate = 1;
+   public int speed = 10;
+
    private ForceGraph graph;
    private List<String> graphs;
+   private int mouseDownX, mouseDownY;
    private int prevMouseX, prevMouseY;
 
-   private final int listMargin = 10;
-   private final int listItemHeight = 15;
-   private final int listWidth = 120;
    private ControlP5 controlP5;
+   private final int margin = 10;
+   private final int itemHeight = 15;
+   private final int controlWidth = 120;
+
    private ListBox graphList;
 
    private List<String> loadGraphList() throws IOException, URISyntaxException {
@@ -57,18 +59,34 @@ public class GraphDrawing extends PApplet {
    private void setupGUI(List<String> graphs) {
       controlP5 = new ControlP5(this);
 
-      graphList = controlP5.addListBox("Graph List", listMargin, listMargin+listItemHeight, listWidth, height-listMargin);
-      graphList.setItemHeight(listItemHeight);
-      graphList.setBarHeight(listItemHeight);
+      // create list of graphs
+      graphList = controlP5.addListBox("Graph List", margin, margin+itemHeight, controlWidth, height-margin);
+      graphList.setItemHeight(itemHeight);
+      graphList.setBarHeight(itemHeight);
 
       graphList.captionLabel().style().marginTop = 3;
       graphList.valueLabel().style().marginTop = 3; // the +/- sign
 
-      graphList.setColorBackground(color(0, 64, 128));
-      graphList.setColorActive(color(128, 192, 255));
-
       for (int i = 0; i < graphs.size(); ++i)
          graphList.addItem(graphs.get(i), i);
+
+      // create sliders
+      Slider slider;
+
+      slider = controlP5.addSlider("zoom", 10, 200, zoom, margin, 400, controlWidth, itemHeight);
+      slider.captionLabel().setColor(0);
+
+      slider = controlP5.addSlider("speed", 1, 50, speed, margin, 400 + itemHeight + margin, controlWidth, itemHeight);
+      slider.captionLabel().setColor(0);
+
+      slider = controlP5.addSlider("growthRate", 0, 5, growthRate, margin, 400 + 2 * (itemHeight + margin), controlWidth, itemHeight);
+      slider.captionLabel().setColor(0);
+
+      slider = controlP5.addSlider("force", 0, 10, force, margin, 400 + 3 * (itemHeight + margin), controlWidth, itemHeight);
+      slider.captionLabel().setColor(0);
+
+      slider = controlP5.addSlider("damping", 0, 10, damping, margin, 400 + 4 * (itemHeight + margin), controlWidth, itemHeight);
+      slider.captionLabel().setColor(0);
    }
 
    @Override
@@ -96,13 +114,14 @@ public class GraphDrawing extends PApplet {
       camera(cam.x, cam.y, cam.z, 0, 0, 0, camUp.x, camUp.y, camUp.z);
 
       if (graph != null) {
-         if (graph.canGrow() && graph.getMaxForce() < growThreshold)
-            graph.grow();
-
-         for (int i = 0; i < iterations; ++i)
+         for (int i = 0; i < speed; ++i) {
             graph.move(1/frameRate, force, damping);
 
-         graph.draw(this, scale);
+            if (graph.canGrow() && graph.getMaxForce() < growthRate)
+               graph.grow();
+         }
+
+         graph.draw(this, zoom);
       }
 
       camera();
@@ -123,19 +142,23 @@ public class GraphDrawing extends PApplet {
 
    @Override
    public void mousePressed() {
+      mouseDownX = mouseX;
+      mouseDownY = mouseY;
       prevMouseX = mouseX;
       prevMouseY = mouseY;
    }
 
    @Override
    public void mouseDragged() {
-      camTheta += map(mouseX-prevMouseX, 0, width, 0, TWO_PI * 1.5f);
-      camPhi += map(mouseY-prevMouseY, 0, height, 0, PI);
+      if (mouseDownX > 2 * margin + controlWidth) {
+         camTheta += map(mouseX-prevMouseX, 0, width, 0, TWO_PI * 1.5f);
+         camPhi += map(mouseY-prevMouseY, 0, height, 0, PI);
 
-      if (camPhi < EPSILON)
-         camPhi = EPSILON;
-      if (camPhi > PI - EPSILON)
-         camPhi = PI - EPSILON;
+         if (camPhi < EPSILON)
+            camPhi = EPSILON;
+         if (camPhi > PI - EPSILON)
+            camPhi = PI - EPSILON;
+      }
 
       prevMouseX = mouseX;
       prevMouseY = mouseY;

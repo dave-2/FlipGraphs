@@ -14,17 +14,59 @@
       </header>
 
       <article>
-         <div>
+         <p class="applet">
             <object type="application/x-java-applet" width="800" height="600">
                <param name="code" value="org.jdesktop.applet.util.JNLPAppletLauncher">
-               <param name="archive" value="http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar">
+               <param name="archive" value="opengl.jar,controlP5.jar,core.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar">
                <param name="jnlpNumExtensions" value="1">
                <param name="jnlpExtension1" value="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp">
                <param name="subapplet.classname" value="GraphDrawing">
-	            <param name="subapplet.displayname" value="GraphDrawing">
+<param name="subapplet.displayname" value="GraphDrawing">
                <param name="boxbgcolor" value="#ffffff">
             </object>
-         </div>
+         </p>
+      </article>
+
+      <article>
+         <h1>A Force-Directed Graph Drawing Algorithm</h1>
+         <p>
+            Force-directed graph drawing algorithms treat the nodes of a graph as point masses. A force is applied to each node such that the force causes the node positions to favor a certain goal. Then mechanics calculations are applied to the nodes so that a local minimum is reached with respect to the goal.
+         </p>
+         <p>
+            In this algorithm implementation, we favored two goals:
+            <ol>
+               <li>Make all edges as close to the same length as possible.</li>
+               <li>Make all nodes as far apart from each other as possible.</li>
+            </ol>
+         </p>
+      </article>
+
+      <article>
+         <h1>Three Forces</h1>
+         <p>
+            To accomplish these goals, we established three forces:
+         </p>
+         <ol>
+            <li>An attractive force between connected nodes.</li>
+            <li>A repulsive force between unconnected nodes.</li>
+            <li>A damping force to prevent the nodes from moving forever.</li>
+         </ol>
+         <p>
+            An attractive force between connected nodes is fairly simple. It could simple be that a node <span class="var">v</span> exerts a force on a neighbor <span class="var">F</span>=<span class="var">n</span> equal to <span class="var">n</span>&minus;<span class="var">v</span>. However, we also wanted connected nodes to be equally spaced. Therefore, we subtracted a unit distance to the difference calculation, giving <span class="var">F</span>=(<span class="var">n</span>&minus;<span class="var">v</span>)(1&minus;1/||<span class="var">n</span>&minus;<span class="var">v</span>||). This has the effect of causing connected nodes to attract or repulse each other until they are a unit distance away from each other.
+         </p>
+         </p>
+            For the repulsive force we used Coulomb repulsion. The repulsive force is proportional to the square of the distance between two nodes. Therefore, given two nodes, the repulsive force is equal to <span class="var">F</span>=&minus;(<span class="var">n</span>&minus;<span class="var">v</span>)/||<span class="var">n</span>&minus;<span class="var">v</span>||<sup>3</sup>
+         </p>
+         <p>
+            Finally, there is a damping force that follows spring damping. The damping force is proportional to the negated velocity of a node.
+         </p>
+      </article>
+
+      <article>
+         <h1>Future Work</h1>
+         <p>For future versions, we want to implement an interface that allows the user to add and remove points and edges. Removing edges would cause an edge contraction. After that is added, it would help to have a way to save and load graphs.
+         </p>
+         <p>We also want to try different algorithms and goals, including ones that are not force-directed, including Tutte's algorithm. We want to do 2-dimensional embeddings and projections from 3-dimensional embeddings to 2-dimensional embeddings.</p>
       </article>
 
       <footer>

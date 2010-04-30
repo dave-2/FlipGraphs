@@ -13,15 +13,9 @@ public class GraphDrawing extends PApplet {
    private final String graphDir = "graphs/";
    private final String extension = ".graph";
 
-   public int zoom = 100;
    private final float camDist = 200;
    private final Vector camUp = new Vector(0, 0, 1);
    private float camTheta = 0, camPhi = (float)Math.PI / 2;
-
-   public float force = 1;
-   public float damping = 1;
-   public float growthRate = 1;
-   public int speed = 10;
 
    private ForceGraph graph;
    private List<String> graphs;
@@ -30,10 +24,26 @@ public class GraphDrawing extends PApplet {
 
    private ControlP5 controlP5;
    private final int margin = 10;
+   private final int padding = 5;
    private final int itemHeight = 15;
    private final int controlWidth = 120;
 
    private ListBox graphList;
+   private Button pauseButton;
+   private CheckBox showVelBox;
+   private CheckBox showAccBox;
+
+   public int zoom = 100;
+
+   public float force = 1;
+   public float damping = 1;
+   public float growthRate = 1;
+   public int speed = 10;
+
+   private boolean paused = false;
+
+   private boolean showVel = false;
+   private boolean showAcc = false;
 
    private List<String> loadGraphList() throws IOException, URISyntaxException {
       List<String> graphs = new ArrayList<String>();
@@ -76,17 +86,29 @@ public class GraphDrawing extends PApplet {
       slider = controlP5.addSlider("zoom", 10, 200, zoom, margin, 400, controlWidth, itemHeight);
       slider.captionLabel().setColor(0);
 
-      slider = controlP5.addSlider("speed", 1, 50, speed, margin, 400 + itemHeight + margin, controlWidth, itemHeight);
+      slider = controlP5.addSlider("speed", 1, 50, speed, margin, 400 + itemHeight + padding, controlWidth, itemHeight);
       slider.captionLabel().setColor(0);
 
-      slider = controlP5.addSlider("growthRate", 0, 5, growthRate, margin, 400 + 2 * (itemHeight + margin), controlWidth, itemHeight);
+      slider = controlP5.addSlider("growthRate", 0, 5, growthRate, margin, 400 + 2 * (itemHeight + padding), controlWidth, itemHeight);
       slider.captionLabel().setColor(0);
 
-      slider = controlP5.addSlider("force", 0, 10, force, margin, 400 + 3 * (itemHeight + margin), controlWidth, itemHeight);
+      slider = controlP5.addSlider("force", 0, 10, force, margin, 400 + 3 * (itemHeight + padding), controlWidth, itemHeight);
       slider.captionLabel().setColor(0);
 
-      slider = controlP5.addSlider("damping", 0, 10, damping, margin, 400 + 4 * (itemHeight + margin), controlWidth, itemHeight);
+      slider = controlP5.addSlider("damping", 0, 10, damping, margin, 400 + 4 * (itemHeight + padding), controlWidth, itemHeight);
       slider.captionLabel().setColor(0);
+
+      // create buttons
+      pauseButton = controlP5.addButton("pause", 0, margin, 400 + 5 * (itemHeight + padding) + margin, controlWidth, itemHeight);
+
+      // create checkboxes
+      showVelBox = controlP5.addCheckBox("showVelBox", margin, 400 + 6 * (itemHeight + padding) + 2 * margin);
+      showVelBox.addItem("show velocity", 0);
+      showVelBox.setColorLabel(0);
+
+      showAccBox = controlP5.addCheckBox("showAccBox", margin, 400 + 7 * (itemHeight + padding) + 2 * margin);
+      showAccBox.addItem("show acceleration", 0);
+      showAccBox.setColorLabel(0);
    }
 
    @Override
@@ -114,30 +136,39 @@ public class GraphDrawing extends PApplet {
       camera(cam.x, cam.y, cam.z, 0, 0, 0, camUp.x, camUp.y, camUp.z);
 
       if (graph != null) {
-         for (int i = 0; i < speed; ++i) {
-            graph.move(1/frameRate, force, damping);
+         if (!paused) {
+            for (int i = 0; i < speed; ++i) {
+               graph.move(1/frameRate, force, damping);
 
-            if (graph.canGrow() && graph.getMaxForce() < growthRate)
-               graph.grow();
+               if (graph.canGrow() && graph.getMaxForce() < growthRate)
+                  graph.grow();
+            }
          }
 
-         graph.draw(this, zoom);
+         graph.draw(this, zoom, showVel, showAcc);
       }
 
       camera();
       controlP5.draw();
-
-      System.out.println(frameRate);
    }
 
    public void controlEvent(ControlEvent event) {
-      if (event.isGroup())
+      if (event.isGroup()) {
          if (event.group() == graphList)
             loadGraph(graphs.get((int)graphList.value()));
+         else if (event.group() == showVelBox)
+            showVel =  showVelBox.arrayValue()[0] > 0;
+         else if (event.group() == showAccBox)
+            showAcc =  showAccBox.arrayValue()[0] > 0;
+      }
    }
 
-   @Override
-   public void mouseClicked() {
+   public void pause() {
+      paused = !paused;
+      if (paused)
+         pauseButton.setCaptionLabel("Play");
+      else
+         pauseButton.setCaptionLabel("Pause");
    }
 
    @Override

@@ -78,7 +78,7 @@ public class Graph {
       return vertices.size();
    }
 
-   public void draw(PApplet g, float bound) {
+   public void draw(PApplet g, float bound, boolean showVel, boolean showAcc) {
       PGraphicsOpenGL pgl = (PGraphicsOpenGL)g.g;
       GL gl = pgl.beginGL();
 
@@ -100,6 +100,26 @@ public class Graph {
          gl.glTranslatef(v.pos.x * scale, v.pos.y * scale, v.pos.z * scale);
          glut.glutSolidIcosahedron();
          gl.glTranslatef(-v.pos.x * scale, -v.pos.y * scale, -v.pos.z * scale);
+      }
+
+      if (showVel) {
+         gl.glBegin(gl.GL_LINES);
+         gl.glColor3f(1, 0.25f, 0.25f);
+         for (Vertex v : vertices) {
+            gl.glVertex3f(v.pos.x * scale, v.pos.y * scale, v.pos.z * scale);
+            gl.glVertex3f((v.pos.x + v.vel.x) * scale, (v.pos.y + v.vel.y) * scale, (v.pos.z + v.vel.z) * scale);
+         }
+         gl.glEnd();
+      }
+
+      if (showAcc) {
+         gl.glBegin(gl.GL_LINES);
+         gl.glColor3f(0, 0.75f, 0);
+         for (Vertex v : vertices) {
+            gl.glVertex3f(v.pos.x * scale, v.pos.y * scale, v.pos.z * scale);
+            gl.glVertex3f((v.pos.x + v.acc.x) * scale, (v.pos.y + v.acc.y) * scale, (v.pos.z + v.acc.z) * scale);
+         }
+         gl.glEnd();
       }
 
       gl.glBegin(gl.GL_LINES);

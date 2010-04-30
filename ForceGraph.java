@@ -30,7 +30,9 @@ public class ForceGraph extends Graph {
    }
 
    public void grow() {
+      // add first vertex
       if (vertices.size() == 0) {
+         // find highest degree vertex
          Vertex maxVertex = null;
          int maxDegree = 0;
          for (Vertex v : baseGraph.vertices) {
@@ -51,6 +53,8 @@ public class ForceGraph extends Graph {
          return;
       }
 
+      // find vertex with highest degree
+      // with respect to nodes already added
       Vertex maxVertex = null;
       int maxDegree = 0;
       for (Vertex v : baseGraph.vertices) {
@@ -76,6 +80,8 @@ public class ForceGraph extends Graph {
       baseGraph.remove(maxVertex);
       vertices.add(maxVertex);
 
+      // if degree is only 1 then add new vertex
+      // 1 unit distance away from its neighbor
       if (maxDegree == 1) {
          for (Vertex n : maxVertex.edges) {
             if (vertices.contains(n)) {
@@ -86,6 +92,7 @@ public class ForceGraph extends Graph {
             }
          }
       }
+      // otherwise, add new vertex at the average position of its neighbors
       else if (maxDegree > 1) {
          for (Vertex n : maxVertex.edges)
             if (vertices.contains(n))
@@ -93,11 +100,11 @@ public class ForceGraph extends Graph {
          maxVertex.pos = maxVertex.pos.div(maxDegree);
       }
 
-      Vector random = new Vector();
-      random.x = (float)Math.random() - 0.5f;
-      random.y = (float)Math.random() - 0.5f;
-      random.z = (float)Math.random() - 0.5f;
-
+      // jitter points randomly to put them in general position
+      float rho = 0.1f;
+      float theta = (float)Math.random() * (float)Math.PI * 2;
+      float phi = (float)Math.random() * (float)Math.PI;
+      Vector random = Vector.sphereToRect(rho, theta, phi);
       maxVertex.pos = maxVertex.pos.add(random);
    }
 
@@ -124,7 +131,8 @@ public class ForceGraph extends Graph {
             }
             else {
                // repel nonadjacent vertices
-               Vector magicDiff = diff.normalize().div(diff.mag());
+               float dist = diff.mag();
+               Vector magicDiff = diff.normalize().div(dist * dist);
                v.acc = v.acc.sub(magicDiff.mult(force));
             }
          }

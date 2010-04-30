@@ -1,4 +1,7 @@
 import processing.core.PApplet;
+import javax.media.opengl.*;
+import com.sun.opengl.util.*;
+import processing.opengl.*;
 
 import java.io.Reader;
 import java.io.File;
@@ -76,29 +79,41 @@ public class Graph {
    }
 
    public void draw(PApplet g, float bound) {
+      PGraphicsOpenGL pgl = (PGraphicsOpenGL)g.g;
+      GL gl = pgl.beginGL();
+
+      gl.glEnable(gl.GL_LINE_SMOOTH);
+      gl.glEnable(gl.GL_BLEND);
+      gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+      gl.glHint(gl.GL_LINE_SMOOTH_HINT, gl.GL_NICEST);
+      gl.glLineWidth(1.5f);
+
+      GLUT glut = new GLUT();
+
       float scale = 1;
       for (Vertex v : vertices)
          scale = Math.max(scale, v.pos.mag());
       scale = bound / scale;
 
-      g.noSmooth();
-      g.noStroke();
+      gl.glColor3f(0, 0.25f, 0.5f);
       for (Vertex v : vertices) {
-         g.translate(v.pos.x * scale, v.pos.y * scale, v.pos.z * scale);
-if (v.acc.mag() > 100 || v.vel.mag() > 100)
-   g.fill(255, 0, 0);
-else
-   g.fill(0, 64, 128);
-         g.sphere(1);
-         g.translate(-v.pos.x * scale, -v.pos.y * scale, -v.pos.z * scale);
+         gl.glTranslatef(v.pos.x * scale, v.pos.y * scale, v.pos.z * scale);
+         glut.glutSolidIcosahedron();
+         gl.glTranslatef(-v.pos.x * scale, -v.pos.y * scale, -v.pos.z * scale);
       }
 
-      g.smooth();
-      g.stroke(1);
-      for (Vertex v : vertices)
-         for (Vertex n : v.edges)
-            if (v.hashCode() < n.hashCode() && vertices.contains(n))
-               g.line(v.pos.x * scale, v.pos.y * scale, v.pos.z * scale,
-                      n.pos.x * scale, n.pos.y * scale, n.pos.z * scale);
+      gl.glBegin(gl.GL_LINES);
+      gl.glColor3f(0.5f, 0.5f, 0.5f);
+      for (Vertex v : vertices) {
+         for (Vertex n : v.edges) {
+            if (v.hashCode() < n.hashCode() && vertices.contains(n)) {
+               gl.glVertex3f(v.pos.x * scale, v.pos.y * scale, v.pos.z * scale);
+               gl.glVertex3f(n.pos.x * scale, n.pos.y * scale, n.pos.z * scale);
+            }
+         }
+      }
+      gl.glEnd();
+
+      pgl.endGL();
    }
 }

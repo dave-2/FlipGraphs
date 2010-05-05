@@ -13,6 +13,8 @@ public class GraphDrawing extends PApplet {
    private final String graphDir = "graphs/";
    private final String extension = ".graph";
 
+   private final String[] graphNames = {"circle", "cube", "dodecahedron", "flipgraph", "goldner_harary", "grid", "icosahedron", "K3,3", "K5", "K6", "K7", "K8", "K9", "mobius", "spikeball", "square", "stellated_dodecahedron", "tetrahedron", "thing", "torus_large", "torus_small", "tree", "triangle", "wheel"};
+
    private final float camDist = 200;
    private final Vector camUp = new Vector(0, 0, 1);
    private float camTheta = 0, camPhi = (float)Math.PI / 2;
@@ -47,9 +49,13 @@ public class GraphDrawing extends PApplet {
 
    private List<String> loadGraphList() throws IOException, URISyntaxException {
       List<String> graphs = new ArrayList<String>();
+      /*
       for (String str : Resource.getResourceListing(getClass(), graphDir))
          if (str.endsWith(extension))
             graphs.add(str.substring(0, str.lastIndexOf('.')));
+      */
+      for (String str : graphNames)
+         graphs.add(str);
 
       Collections.sort(graphs);
       return graphs;
